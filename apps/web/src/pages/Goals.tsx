@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { m } from "framer-motion";
 import { useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, MessageCircle, Trash2 } from "lucide-react";
@@ -49,7 +50,7 @@ export function GoalsPage() {
                   {g.description && <div className="text-sm text-[var(--muted)]">{g.description}</div>}
                   <div className="mt-3 flex items-center gap-3">
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--line)]">
-                      <div className="h-full rounded-full bg-[var(--accent)] transition-all" style={{ width: `${pct}%` }} />
+                      <m.div className="h-full origin-left rounded-full bg-[var(--accent)]" initial={false} animate={{ scaleX: pct / 100 }} />
                     </div>
                     <div className="text-xs text-[var(--muted)]">
                       {n}/{g.plan.length}

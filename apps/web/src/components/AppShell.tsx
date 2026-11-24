@@ -7,6 +7,8 @@ import type { Me, Space } from "../lib/types";
 import { AgentPanel, usePanel } from "./AgentPanel";
 import { useNewSideChat } from "./AgentHeader";
 import { cx } from "./ui";
+import { AnimatePresence, m } from "framer-motion";
+import { fade, reveal, settle, useMotionAllowed } from "./Motion";
 
 function spaceVisibleNow(s: Space) {
   const days = s.schedule?.days;
@@ -15,6 +17,7 @@ function spaceVisibleNow(s: Space) {
 }
 
 function RailItem({ href, icon, label, active, testid }: { href: string; icon: ReactNode; label: string; active: boolean; testid?: string }) {
+  const animate = useMotionAllowed();
   return (
     <Link
       href={href}
@@ -23,10 +26,18 @@ function RailItem({ href, icon, label, active, testid }: { href: string; icon: R
       aria-current={active ? "page" : undefined}
       title={label}
       className={cx(
-        "group relative flex h-10 w-10 items-center justify-center rounded-xl transition",
-        active ? "glass text-highlight ring-1 ring-highlight/35" : "text-muted hover:bg-hover hover:text-ink",
+        "group relative isolate flex h-10 w-10 items-center justify-center rounded-xl transition-colors",
+        active ? "text-highlight" : "text-muted hover:bg-hover hover:text-ink",
       )}
     >
+      {active && (
+        <m.span
+          aria-hidden
+          layoutId={animate ? "workspace-rail-selection" : undefined}
+          transition={settle}
+          className="glass pointer-events-none absolute inset-0 -z-10 rounded-xl ring-1 ring-highlight/35"
+        />
+      )}
       {icon}
       <span className="pointer-events-none absolute left-12 z-50 hidden whitespace-nowrap rounded-md border border-edge bg-panel px-2 py-1 text-xs text-ink shadow group-hover:block">
         {label}
@@ -110,21 +121,33 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
       </nav>
 
       <main className="relative flex min-w-0 flex-1 flex-col">
-        <div key={pageKey} className="amuse-page min-h-0 flex-1 [&>*]:h-full">
+        <m.div key={pageKey} {...reveal} className="amuse-page min-h-0 flex-1 [&>*]:h-full">
           {children}
-        </div>
+        </m.div>
         <MobileNav loc={loc} isChat={isChat} tabSpaces={tabSpaces} />
       </main>
 
-      {open && wide && <AgentPanel me={me} />}
-      {open && !wide && (
-        <div className="fixed inset-0 z-40 flex justify-end" onClick={() => setOpen(false)}>
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="relative h-full" onClick={(e) => e.stopPropagation()}>
-            <AgentPanel me={me} overlay />
-          </div>
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {open && wide && (
+          <m.div
+            key="docked-panel"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: "auto", opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            className="shrink-0 overflow-hidden"
+          >
+            <AgentPanel me={me} />
+          </m.div>
+        )}
+        {open && !wide && (
+          <m.div key="overlay-panel" className="fixed inset-0 z-40 flex justify-end" exit={{ pointerEvents: "none" }} onClick={() => setOpen(false)}>
+            <m.div {...fade} className="absolute inset-0 bg-black/50" />
+            <m.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} className="relative h-full" onClick={(e) => e.stopPropagation()}>
+              <AgentPanel me={me} overlay />
+            </m.div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -150,29 +173,33 @@ function MobileNav({ loc, isChat, tabSpaces }: { loc: string; isChat: boolean; t
   const moreActive = extra.some((t) => active(t.href));
   return (
     <>
-      {more && (
-        <div className="fixed inset-0 z-30 md:hidden" onClick={() => setMore(false)}>
-          <div className="absolute inset-0 bg-black/40" />
-          <div
-            className="glass absolute right-2 bottom-[calc(60px+env(safe-area-inset-bottom))] w-48 rounded-card border border-edge p-1.5 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-            data-testid="mobile-more-sheet"
-          >
-            {extra.map((t) => (
-              <Link
-                key={t.href}
-                href={t.href}
-                className={cx(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm",
-                  active(t.href) ? "bg-[var(--hover)] text-[var(--ink)]" : "text-[var(--ink)] hover:bg-[var(--hover)]",
-                )}
-              >
-                {t.icon} {t.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {more && (
+          <m.div key="more" className="fixed inset-0 z-30 md:hidden" exit={{ pointerEvents: "none" }} onClick={() => setMore(false)}>
+            <m.div {...fade} className="absolute inset-0 bg-black/40" />
+            <m.div
+              {...reveal}
+              exit={{ y: 6, opacity: 0 }}
+              className="glass absolute right-2 bottom-[calc(60px+env(safe-area-inset-bottom))] w-48 rounded-card border border-edge p-1.5 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+              data-testid="mobile-more-sheet"
+            >
+              {extra.map((t) => (
+                <Link
+                  key={t.href}
+                  href={t.href}
+                  className={cx(
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm",
+                    active(t.href) ? "bg-[var(--hover)] text-[var(--ink)]" : "text-[var(--ink)] hover:bg-[var(--hover)]",
+                  )}
+                >
+                  {t.icon} {t.label}
+                </Link>
+              ))}
+            </m.div>
+          </m.div>
+        )}
+      </AnimatePresence>
       <nav aria-label="Workspace" className="glass relative z-30 flex border-t border-edge pb-[env(safe-area-inset-bottom)] md:hidden">
         {main.map((t) => (
           <Link

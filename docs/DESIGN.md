@@ -34,3 +34,11 @@ Before shipping a layout change, check phone, tablet and wide desktop widths. Ch
 ### Companion picker on a phone
 
 ![Six labeled plush portraits arranged in two rows, with a checkmark and focus outline on Coral.](media/companion-picker.png)
+
+## Motion
+
+[Watch the companion selection, page change, and library sheet transitions](media/workspace-motion.gif).
+
+Use Framer Motion's `m` components under `AppMotion`. Pages and steps enter immediately with a 180ms fade and a 6px rise. Slide overlays from the edge they occupy; use `AnimatePresence` when they need to finish an exit. Use the shared `settle` spring for direct feedback on presses, switches, and selection indicators.
+
+Animate new chat bubbles once, not historical messages or streaming text updates. Keep keyboard focus, selection state, and resource cleanup independent of animation completion. Reduced motion should apply changes immediately, including when the system preference changes while the app is open. Leave color changes and small loading spinners in CSS rather than adding animation components to every element.

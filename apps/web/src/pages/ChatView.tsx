@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { m as motion } from "framer-motion";
+import { reveal, useMotionAllowed } from "../components/Motion";
 import { CalendarClock, MoreHorizontal, Reply, Smile } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, post, timeAgo, timeUntil } from "../lib/api";
@@ -107,6 +109,28 @@ function MessageActions({ m }: { m: Message }) {
   );
 }
 
+function TypingIndicator() {
+  const animate = useMotionAllowed();
+  return (
+    <div
+      role="status"
+      aria-label="Agent is typing"
+      className="inline-flex w-fit gap-1 self-start rounded-[18px] bg-[var(--bubble)] px-3.5 py-3"
+      data-testid="typing"
+    >
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          aria-hidden
+          key={i}
+          className="size-1.5 rounded-full bg-ink"
+          animate={animate ? { opacity: [0.35, 1, 0.35], y: [0, -2, 0] } : { opacity: 1, y: 0 }}
+          transition={animate ? { duration: 0.85, delay: i * 0.12, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function ChatView({ me, chatId, title }: { me: Me; chatId: number; title?: string }) {
   const qc = useQueryClient();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -116,6 +140,7 @@ export function ChatView({ me, chatId, title }: { me: Me; chatId: number; title?
   const scroller = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
   const latestRun = useRef(0);
+  const historyEnd = useRef<number | null>(null);
   const { status } = useEvents();
 
   const { data: approvals } = useQuery({ queryKey: ["approvals"], queryFn: () => api<{ approvals: Approval[] }>("/approvals"), refetchInterval: 15000 });
@@ -123,6 +148,7 @@ export function ChatView({ me, chatId, title }: { me: Me; chatId: number; title?
 
   const load = useCallback(async () => {
     const r = await api<{ messages: Message[]; running: boolean }>(`/chats/${chatId}/messages`);
+    historyEnd.current ??= r.messages.reduce((last, message) => Math.max(last, message.id), 0);
     setMessages(r.messages);
     setRunning(r.running);
     setLoaded(true);
@@ -231,12 +257,14 @@ export function ChatView({ me, chatId, title }: { me: Me; chatId: number; title?
               return (
                 <div key={m.id} className="contents">
                   {stampEl}
-                  <div
+                  <motion.div
+                    initial={m.id < 0 ? reveal.initial : false}
+                    animate={reveal.animate}
                     className="max-w-[80%] self-end whitespace-pre-wrap rounded-[20px] bg-[var(--accent)] px-3.5 py-2 text-[14.5px] leading-snug text-white"
                     data-testid="msg-user"
                   >
                     {m.content}
-                  </div>
+                  </motion.div>
                 </div>
               );
             const isLive = running && m.id === lastAssistant?.id;
@@ -246,7 +274,12 @@ export function ChatView({ me, chatId, title }: { me: Me; chatId: number; title?
             return (
               <div key={m.id} className="contents">
                 {stampEl}
-                <div className="flex w-full max-w-[85%] flex-col self-start md:max-w-[78%]" data-testid="msg-assistant">
+                <motion.div
+                  initial={historyEnd.current !== null && m.id > historyEnd.current ? reveal.initial : false}
+                  animate={reveal.animate}
+                  className="flex w-full max-w-[85%] flex-col self-start md:max-w-[78%]"
+                  data-testid="msg-assistant"
+                >
                   {m.proactive && !(m.parts ?? []).some((p: any) => p.type === "tip_image") && (
                     <div className="mb-1 text-[11px] font-medium text-[#7fb0ff]">
                       {name} checked in · {timeAgo(m.createdAt)}
@@ -273,11 +306,7 @@ export function ChatView({ me, chatId, title }: { me: Me; chatId: number; title?
                       )}
                     </div>
                   ) : isLive ? (
-                    <div className="inline-flex w-fit gap-1 rounded-[18px] bg-[var(--bubble)] px-3.5 py-3" data-testid="typing">
-                      <span className="amuse-dot h-1.5 w-1.5 rounded-full bg-[var(--ink)]" />
-                      <span className="amuse-dot h-1.5 w-1.5 rounded-full bg-[var(--ink)] [animation-delay:150ms]" />
-                      <span className="amuse-dot h-1.5 w-1.5 rounded-full bg-[var(--ink)] [animation-delay:300ms]" />
-                    </div>
+                    <TypingIndicator />
                   ) : null}
                   {(m.parts ?? []).some((p: any) => p.type === "reaction") && (
                     <div className="-mt-2 ml-2 w-fit rounded-full border border-[var(--line)] bg-[#202020] px-1.5 text-sm" data-testid="msg-reaction">
@@ -293,7 +322,7 @@ export function ChatView({ me, chatId, title }: { me: Me; chatId: number; title?
                     parts={(m.parts ?? []).filter((p: any) => !["reaction", "scheduled", "tool_history", "context_checkpoint"].includes(p.type))}
                     chatId={chatId}
                   />
-                </div>
+                </motion.div>
               </div>
             );
           })}
@@ -302,13 +331,7 @@ export function ChatView({ me, chatId, title }: { me: Me; chatId: number; title?
               <ApprovalCard approval={a} />
             </div>
           ))}
-          {running && !lastAssistant?.content && lastAssistant?.id !== visible[visible.length - 1]?.id && (
-            <div className="inline-flex w-fit gap-1 self-start rounded-[18px] bg-[var(--bubble)] px-3.5 py-3" data-testid="typing">
-              <span className="amuse-dot h-1.5 w-1.5 rounded-full bg-[var(--ink)]" />
-              <span className="amuse-dot h-1.5 w-1.5 rounded-full bg-[var(--ink)] [animation-delay:150ms]" />
-              <span className="amuse-dot h-1.5 w-1.5 rounded-full bg-[var(--ink)] [animation-delay:300ms]" />
-            </div>
-          )}
+          {running && !lastAssistant?.content && lastAssistant?.id !== visible[visible.length - 1]?.id && <TypingIndicator />}
         </div>
       </div>
       <Composer onSend={send} running={running} onStop={() => post(`/chats/${chatId}/stop`)} onVoice={() => (unlockCallAudio(), setVoice(true))} />

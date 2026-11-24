@@ -1,5 +1,7 @@
 import { Check } from "lucide-react";
+import { AnimatePresence, m } from "framer-motion";
 import { cx } from "./ui";
+import { settle, useMotionAllowed } from "./Motion";
 
 /**
  * Amuse's built-in companion creatures.
@@ -19,6 +21,7 @@ export function presetImage(id: string, busy = false) {
 }
 
 export function AvatarPicker({ value, onChange }: { value: string | null; onChange: (avatarUrl: string) => void }) {
+  const animate = useMotionAllowed();
   return (
     <fieldset className="@container min-w-0">
       <legend className="mb-2.5 text-sm font-medium text-ink">Choose a companion</legend>
@@ -27,8 +30,11 @@ export function AvatarPicker({ value, onChange }: { value: string | null; onChan
           const url = `preset:${id}`;
           const selected = (value ?? "preset:pip") === url;
           return (
-            <button
+            <m.button
               key={id}
+              whileHover={animate ? { y: -2 } : undefined}
+              whileTap={animate ? { scale: 0.96 } : undefined}
+              transition={settle}
               type="button"
               aria-pressed={selected}
               onClick={() => onChange(url)}
@@ -41,12 +47,22 @@ export function AvatarPicker({ value, onChange }: { value: string | null; onChan
               <span className={cx("block px-2 py-1.5 text-center text-xs font-medium", selected ? "glass text-ink" : "text-muted group-hover:text-ink")}>
                 {name}
               </span>
-              {selected && (
-                <span aria-hidden="true" className="absolute top-1.5 right-1.5 grid size-4.5 place-items-center rounded-full bg-ink text-canvas shadow">
-                  <Check size={12} strokeWidth={3} />
-                </span>
-              )}
-            </button>
+              <AnimatePresence initial={false}>
+                {selected && (
+                  <m.span
+                    key="selected"
+                    initial={{ opacity: 0, scale: 0.75 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.85 }}
+                    transition={settle}
+                    aria-hidden="true"
+                    className="absolute top-1.5 right-1.5 grid size-4.5 place-items-center rounded-full bg-ink text-canvas shadow"
+                  >
+                    <Check size={12} strokeWidth={3} />
+                  </m.span>
+                )}
+              </AnimatePresence>
+            </m.button>
           );
         })}
       </div>
@@ -58,17 +74,21 @@ export function AvatarPicker({ value, onChange }: { value: string | null; onChan
 export function PlushAvatar({ id, size = 64, busy = false, className = "" }: { id: string; size?: number; busy?: boolean; className?: string }) {
   return (
     <div className={`relative shrink-0 overflow-hidden rounded-full bg-[var(--card)] ${className}`} style={{ width: size, height: size }}>
-      <img
+      <m.img
         src={presetImage(id, false)}
         alt=""
         draggable={false}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${busy ? "opacity-0" : "opacity-100"}`}
+        initial={false}
+        animate={{ opacity: busy ? 0 : 1 }}
+        className="absolute inset-0 h-full w-full object-cover"
       />
-      <img
+      <m.img
         src={presetImage(id, true)}
         alt=""
         draggable={false}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${busy ? "opacity-100" : "opacity-0"}`}
+        initial={false}
+        animate={{ opacity: busy ? 1 : 0 }}
+        className="absolute inset-0 h-full w-full object-cover"
       />
     </div>
   );

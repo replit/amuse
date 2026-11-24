@@ -22,6 +22,8 @@ import { useEvents } from "../lib/events";
 import type { Me } from "../lib/types";
 import { ApprovalCard } from "./ApprovalCard";
 import { AgentAvatar, AvatarPicker } from "./Creature";
+import { AnimatePresence, m } from "framer-motion";
+import { reveal } from "./Motion";
 import { FilesBrowser } from "./FilesBrowser";
 import { Button, cx, Empty, Input } from "./ui";
 
@@ -61,11 +63,25 @@ function Section({ title, children, defaultOpen = true }: { title: ReactNode; ch
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="px-4 pb-2 pt-3">
-      <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between py-1 text-[13px] text-[var(--ink)]">
+      <button aria-expanded={open} onClick={() => setOpen(!open)} className="flex w-full items-center justify-between py-1 text-[13px] text-[var(--ink)]">
         <span>{title}</span>
-        <ChevronDown size={16} className={cx("text-[var(--muted)] transition", !open && "-rotate-90")} />
+        <m.span initial={false} animate={{ rotate: open ? 0 : -90 }}>
+          <ChevronDown size={16} className="text-muted" />
+        </m.span>
       </button>
-      {open && <div className="mt-1">{children}</div>}
+      <AnimatePresence initial={false}>
+        {open && (
+          <m.div
+            key="details"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-1">{children}</div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -453,11 +469,11 @@ export function AgentPanel({ me, overlay = false }: { me: Me; overlay?: boolean 
           ))}
         </div>
       </div>
-      <div className="mt-1 min-h-0 flex-1 overflow-y-auto pb-6">
+      <m.div key={tab} {...reveal} className="mt-1 min-h-0 flex-1 overflow-y-auto pb-6">
         {tab === "activity" && <ActivityTab key={tabKey} />}
         {tab === "approvals" && <ApprovalsTab />}
         {tab === "identity" && <IdentityTab key={tabKey} me={me} editing={editing} setEditing={setEditing} />}
-      </div>
+      </m.div>
     </aside>
   );
 }

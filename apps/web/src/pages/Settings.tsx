@@ -5,6 +5,8 @@ import { ChevronRight, KeyRound, Loader2, Trash2 } from "lucide-react";
 import { api, del, patch, post } from "../lib/api";
 import type { Me } from "../lib/types";
 import { AgentAvatar, AvatarPicker, portraitName } from "../components/Creature";
+import { m } from "framer-motion";
+import { reveal } from "../components/Motion";
 import { Button, Card, Input, Page, Segmented, Toggle, cx } from "../components/ui";
 import { deviceVoiceAvailable, setVoiceEngine, voiceEngine, type VoiceEngine } from "../lib/speech";
 
@@ -39,7 +41,9 @@ function AgentSettings({ me }: { me: Me }) {
     <>
       <Section title="Your agent">
         <div className="mb-4 flex items-center gap-3">
-          <AgentAvatar avatarUrl={me.agent.avatarUrl} size={56} />
+          <m.div key={me.agent.avatarUrl} initial={{ opacity: 0.6, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+            <AgentAvatar avatarUrl={me.agent.avatarUrl} size={56} />
+          </m.div>
           <div>
             <div className="text-xs text-muted">Current look</div>
             <div className="font-medium text-ink">{portraitName(me.agent.avatarUrl)}</div>
@@ -394,14 +398,14 @@ export function SettingsPage({ me }: { me: Me }) {
             </Link>
           ))}
         </nav>
-        <div className="min-w-0 flex-1">
+        <m.div key={tab} {...reveal} className="min-w-0 flex-1">
           {tab === "agent" && <AgentSettings me={me} />}
           {tab === "connectors" && <ConnectorsSettings />}
           {tab === "permissions" && <PermissionsSettings />}
           {tab === "credentials" && <CredentialsSettings />}
           {tab === "usage" && <UsageSettings />}
           {tab === "data" && <DataSettings me={me} />}
-        </div>
+        </m.div>
       </div>
     </Page>
   );

@@ -1,12 +1,14 @@
 import { createPortal } from "react-dom";
-import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
+import { AnimatePresence, m, type HTMLMotionProps } from "framer-motion";
+import { fade, settle, useMotionAllowed } from "./Motion";
 import { X } from "lucide-react";
 
 export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(" ");
 }
 
-type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "soft" | "danger" | "outline"; size?: "sm" | "md" | "lg" };
+type BtnProps = HTMLMotionProps<"button"> & { variant?: "primary" | "ghost" | "soft" | "danger" | "outline"; size?: "sm" | "md" | "lg" };
 export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button({ variant = "primary", size = "md", className, ...p }, ref) {
   const v = {
     primary: "bg-ink text-canvas hover:opacity-90",
@@ -16,9 +18,12 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button({ 
     danger: "bg-danger text-white hover:opacity-90",
   }[variant];
   const s = { sm: "h-8 px-3 text-sm", md: "h-10 px-4 text-sm", lg: "h-12 px-6 text-base" }[size];
+  const animate = useMotionAllowed();
   return (
-    <button
+    <m.button
       ref={ref}
+      whileTap={animate && !p.disabled ? { scale: 0.97 } : undefined}
+      transition={settle}
       className={cx(
         "inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none",
         v,
@@ -66,14 +71,21 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={cx("relative h-6 w-11 rounded-full transition", checked ? "bg-[var(--ink)]" : "bg-[var(--line)]")}
+      className={cx("relative h-6 w-11 rounded-full transition-colors", checked ? "bg-[var(--ink)]" : "bg-[var(--line)]")}
     >
-      <span className={cx("absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition", checked ? "left-[22px]" : "left-0.5")} />
+      <m.span
+        initial={false}
+        animate={{ x: checked ? 20 : 0 }}
+        transition={settle}
+        className="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow"
+      />
     </button>
   );
 }
 
 export function Segmented<T extends string>({ value, options, onChange }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
+  const indicator = useId();
+  const animate = useMotionAllowed();
   return (
     <div className="glass inline-flex rounded-full border border-edge p-0.5">
       {options.map((o) => (
@@ -81,11 +93,16 @@ export function Segmented<T extends string>({ value, options, onChange }: { valu
           key={o.value}
           aria-pressed={value === o.value}
           onClick={() => onChange(o.value)}
-          className={cx(
-            "rounded-full px-3 py-1 text-sm transition",
-            value === o.value ? "bg-[var(--ink)] text-[var(--bg)]" : "text-[var(--muted)] hover:text-[var(--ink)]",
-          )}
+          className={cx("relative isolate rounded-full px-3 py-1 text-sm", value === o.value ? "text-canvas" : "text-muted hover:text-ink")}
         >
+          {value === o.value && (
+            <m.span
+              layoutId={animate ? indicator : undefined}
+              transition={settle}
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-ink"
+            />
+          )}
           {o.label}
         </button>
       ))}
@@ -108,26 +125,32 @@ export function Sheet({
   side?: "right" | "bottom";
   wide?: boolean;
 }) {
-  if (!open) return null;
   return createPortal(
-    <div className="fixed inset-0 z-50 flex" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/25 backdrop-blur-[1px]" />
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className={cx(
-          "glass relative ml-auto flex h-full flex-col border-l border-edge shadow-2xl",
-          side === "right" ? (wide ? "w-full max-w-4xl" : "w-full max-w-md") : "mt-auto h-[85vh] w-full rounded-t-3xl",
-        )}
-      >
-        <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-3">
-          <div className="font-semibold">{title}</div>
-          <button onClick={onClose} className="rounded-full p-2 hover:bg-[var(--hover)]" aria-label="Close">
-            <X size={18} />
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto">{children}</div>
-      </div>
-    </div>,
+    <AnimatePresence>
+      {open && (
+        <m.div key="sheet" className="fixed inset-0 z-50 flex" exit={{ pointerEvents: "none" }} onClick={onClose}>
+          <m.div {...fade} className="absolute inset-0 bg-black/25 backdrop-blur-[1px]" />
+          <m.div
+            initial={side === "right" ? { x: 32, opacity: 0 } : { y: 32, opacity: 0 }}
+            animate={{ x: 0, y: 0, opacity: 1 }}
+            exit={side === "right" ? { x: 24, opacity: 0 } : { y: 24, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className={cx(
+              "glass relative ml-auto flex h-full flex-col border-l border-edge shadow-2xl",
+              side === "right" ? (wide ? "w-full max-w-4xl" : "w-full max-w-md") : "mt-auto h-[85vh] w-full rounded-t-3xl",
+            )}
+          >
+            <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-3">
+              <div className="font-semibold">{title}</div>
+              <button onClick={onClose} className="rounded-full p-2 hover:bg-[var(--hover)]" aria-label="Close">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">{children}</div>
+          </m.div>
+        </m.div>
+      )}
+    </AnimatePresence>,
     document.body,
   );
 }

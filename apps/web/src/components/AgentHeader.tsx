@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, m } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Menu, MessageCircle, MessagesSquare, Phone, Plus } from "lucide-react";
@@ -9,6 +10,7 @@ import { AgentAvatar } from "./Creature";
 import { statusEmoji, usePanel } from "./AgentPanel";
 import { NotificationsSheet } from "./NotificationsSheet";
 import { cx } from "./ui";
+import { reveal } from "./Motion";
 
 export function useNewSideChat() {
   const qc = useQueryClient();
@@ -39,46 +41,57 @@ function ChatsMenu({ title }: { title?: string }) {
         onClick={() => setOpen(!open)}
         className="flex h-8 shrink-0 items-center gap-2 rounded-full bg-[var(--card)] px-3 text-[13px] hover:bg-[var(--hover)]"
         data-testid="open-chats"
+        aria-expanded={open}
         aria-label="Chats"
       >
         <Menu size={15} /> Chats
       </button>
       {title && <div className="truncate text-sm text-[var(--muted)]">{title}</div>}
-      {open && (
-        <div className="glass absolute top-10 left-0 w-72 rounded-card border border-edge p-2 shadow-2xl">
-          <Link
-            href="/"
-            onClick={() => setOpen(false)}
-            className={cx("flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-[var(--hover)]", loc === "/" && "bg-[var(--hover)]")}
+      <AnimatePresence>
+        {open && (
+          <m.div
+            key="chats"
+            {...reveal}
+            exit={{ opacity: 0, y: 4, pointerEvents: "none" }}
+            className="glass absolute top-10 left-0 w-72 rounded-card border border-edge p-2 shadow-2xl"
           >
-            <MessageCircle size={16} /> Main chat
-          </Link>
-          {side.length > 0 && <div className="px-3 pb-1 pt-3 text-[11px] text-[var(--muted)]">Side chats</div>}
-          <div className="max-h-64 overflow-y-auto">
-            {side.map((c) => (
-              <Link
-                key={c.id}
-                href={`/chats/${c.id}`}
-                onClick={() => setOpen(false)}
-                className={cx("flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-[var(--hover)]", loc === `/chats/${c.id}` && "bg-[var(--hover)]")}
-              >
-                <MessagesSquare size={15} className="shrink-0" /> <span className="truncate">{c.title}</span>
-              </Link>
-            ))}
-          </div>
-          <div className="mt-2 rounded-xl bg-[var(--card)] p-3 text-center">
-            <MessagesSquare size={20} className="mx-auto text-[var(--muted)]" />
-            <div className="mt-1 text-sm font-medium">Start a side chat</div>
-            <div className="mt-0.5 text-xs text-[var(--muted)]">Keep a bigger project in its own thread. I still remember everything about you.</div>
-            <button
-              onClick={() => (setOpen(false), void newSide())}
-              className="mt-2 inline-flex h-8 items-center gap-1.5 rounded-full bg-[var(--hover)] px-3 text-xs hover:bg-[#363636]"
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className={cx("flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-[var(--hover)]", loc === "/" && "bg-[var(--hover)]")}
             >
-              <Plus size={13} /> New side chat
-            </button>
-          </div>
-        </div>
-      )}
+              <MessageCircle size={16} /> Main chat
+            </Link>
+            {side.length > 0 && <div className="px-3 pb-1 pt-3 text-[11px] text-[var(--muted)]">Side chats</div>}
+            <div className="max-h-64 overflow-y-auto">
+              {side.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/chats/${c.id}`}
+                  onClick={() => setOpen(false)}
+                  className={cx(
+                    "flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-[var(--hover)]",
+                    loc === `/chats/${c.id}` && "bg-[var(--hover)]",
+                  )}
+                >
+                  <MessagesSquare size={15} className="shrink-0" /> <span className="truncate">{c.title}</span>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-2 rounded-xl bg-[var(--card)] p-3 text-center">
+              <MessagesSquare size={20} className="mx-auto text-[var(--muted)]" />
+              <div className="mt-1 text-sm font-medium">Start a side chat</div>
+              <div className="mt-0.5 text-xs text-[var(--muted)]">Keep a bigger project in its own thread. I still remember everything about you.</div>
+              <button
+                onClick={() => (setOpen(false), void newSide())}
+                className="mt-2 inline-flex h-8 items-center gap-1.5 rounded-full bg-[var(--hover)] px-3 text-xs hover:bg-[#363636]"
+              >
+                <Plus size={13} /> New side chat
+              </button>
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
