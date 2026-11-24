@@ -21,7 +21,7 @@ import { api, del, patch, timeUntil } from "../lib/api";
 import { useEvents } from "../lib/events";
 import type { Me } from "../lib/types";
 import { ApprovalCard } from "./ApprovalCard";
-import { AgentAvatar, PRESETS } from "./Creature";
+import { AgentAvatar, AvatarPicker } from "./Creature";
 import { FilesBrowser } from "./FilesBrowser";
 import { Button, cx, Empty, Input } from "./ui";
 
@@ -292,21 +292,7 @@ function IdentityTab({ me, editing, setEditing }: { me: Me; editing: boolean; se
           </button>
         ) : (
           <div className="mt-3 space-y-3">
-            <div className="flex flex-wrap justify-center gap-2">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => save({ avatarUrl: `preset:${p.id}` })}
-                  aria-label={p.name}
-                  className={cx(
-                    "rounded-full ring-offset-2 ring-offset-[var(--card)]",
-                    me.agent.avatarUrl === `preset:${p.id}` && "ring-2 ring-[var(--accent)]",
-                  )}
-                >
-                  <AgentAvatar avatarUrl={`preset:${p.id}`} size={40} />
-                </button>
-              ))}
-            </div>
+            <AvatarPicker value={me.agent.avatarUrl} onChange={(avatarUrl) => save({ avatarUrl })} />
             <label className="block text-xs text-[var(--muted)]">
               Name
               <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" data-testid="identity-name-input" />

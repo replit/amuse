@@ -22,9 +22,15 @@ Reading content is capped at 48rem, collections use the 68rem page frame, and co
 
 ## Materials and interaction
 
-- Use `workspace-canvas` for the background. Use `glass` for chrome: rails, toolbars, the composer and sheets. It combines a translucent tint, a single rim highlight and backdrop blur. Don't stack blur on every card.
+- Keep the workspace canvas, surfaces, borders and text neutral charcoal and silver. Reserve color for meaningful details such as links, status and avatars, not background washes.
+- Use `workspace-canvas` for the background. Use `glass` for chrome: rails, toolbars, the composer and sheets. Create the glass effect with blur and a faint white rim, not a colored tint. Don't stack blur on every card.
 - Use opaque `bg-surface` for reading and editing. Pair `text-ink` with primary content, `text-muted` with supporting text, and `text-highlight` with selected controls. Use `border-edge` for boundaries.
 - Use `rounded-control` for fields, `rounded-card` for content, and fully rounded buttons for actions. Keep a visible focus indicator. Label icon-only controls and expose the active navigation item or segment to assistive technology.
+- Use `AvatarPicker` for companion choices. Show the actual portrait and name, not a substitute icon. Pair the selected border with a checkmark and a pressed state; let the container width determine whether three or six portraits fit per row.
 - Glass has an opaque fallback when blur is unavailable or reduced transparency is requested. Don't rely on translucency, motion or color alone to communicate state.
 
 Before shipping a layout change, check phone, tablet and wide desktop widths. Check that the page title and first control share a left edge, that horizontal scrolling stays inside intentional strips, and that long content remains reachable with the agent panel open.
+
+### Companion picker on a phone
+
+![Six labeled plush portraits arranged in two rows, with a checkmark and focus outline on Coral.](media/companion-picker.png)

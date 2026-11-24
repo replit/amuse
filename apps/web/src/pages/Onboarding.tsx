@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Loader2, Wand2 } from "lucide-react";
 import { post } from "../lib/api";
 import type { Me } from "../lib/types";
-import { AgentAvatar, CreatureSvg, PRESETS } from "../components/Creature";
+import { AgentAvatar, AvatarPicker } from "../components/Creature";
 import { Button, Input, cx } from "../components/ui";
 
 const VIBES = ["Warm and encouraging", "Calm and organised", "Witty and playful", "Straight to the point", "Curious and nerdy"];
@@ -120,21 +120,7 @@ export function Onboarding({ me }: { me: Me }) {
             <div className="my-6 flex justify-center">
               <AgentAvatar avatarUrl={avatar} size={120} />
             </div>
-            <div className="grid grid-cols-6 gap-2">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setAvatar(`preset:${p.id}`)}
-                  className={cx(
-                    "flex aspect-square items-center justify-center rounded-2xl bg-[var(--card)] p-1 ring-offset-2 ring-offset-[var(--bg)]",
-                    avatar === `preset:${p.id}` && "ring-2 ring-[var(--ink)]",
-                  )}
-                  aria-label={p.name}
-                >
-                  <CreatureSvg id={p.id} size={48} />
-                </button>
-              ))}
-            </div>
+            <AvatarPicker value={avatar} onChange={setAvatar} />
             <div className="mt-5 rounded-2xl border border-[var(--line)] bg-[var(--card)] p-3">
               <div className="mb-2 text-sm font-medium">Or design your own</div>
               <div className="flex gap-2">

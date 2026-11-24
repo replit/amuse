@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, KeyRound, Loader2, Trash2 } from "lucide-react";
 import { api, del, patch, post } from "../lib/api";
 import type { Me } from "../lib/types";
-import { AgentAvatar, PRESETS } from "../components/Creature";
+import { AgentAvatar, AvatarPicker } from "../components/Creature";
 import { Button, Card, Input, Page, Segmented, Toggle, cx } from "../components/ui";
 import { deviceVoiceAvailable, setVoiceEngine, voiceEngine, type VoiceEngine } from "../lib/speech";
 
@@ -38,20 +38,15 @@ function AgentSettings({ me }: { me: Me }) {
   return (
     <>
       <Section title="Your agent">
-        <div className="mb-4 flex items-center gap-4">
-          <AgentAvatar avatarUrl={me.agent.avatarUrl} size={72} />
-          <div className="flex flex-wrap gap-2">
-            {PRESETS.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => save({ avatarUrl: `preset:${p.id}` })}
-                className={cx("rounded-full ring-offset-2", me.agent.avatarUrl === `preset:${p.id}` && "ring-2 ring-[var(--ink)]")}
-                aria-label={p.name}
-              >
-                <AgentAvatar avatarUrl={`preset:${p.id}`} size={40} />
-              </button>
-            ))}
+        <div className="mb-4 flex items-center gap-3">
+          <AgentAvatar avatarUrl={me.agent.avatarUrl} size={56} />
+          <div>
+            <div className="text-xs text-muted">Current look</div>
+            <div className="font-medium text-ink">{me.agent.name}</div>
           </div>
+        </div>
+        <div className="mb-5 max-w-lg">
+          <AvatarPicker value={me.agent.avatarUrl} onChange={(avatarUrl) => save({ avatarUrl })} />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-sm">
