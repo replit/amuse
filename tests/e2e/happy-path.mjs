@@ -530,6 +530,18 @@ await step("F05", "Live status under avatar while working", async () => {
 // F31 search
 await step("F31", "Search across chats, artifacts and files", async () => {
   await page.getByTestId("nav-search").click();
+  const viewport = page.viewportSize();
+  try {
+    for (const width of [390, 820, 1440]) {
+      await page.setViewportSize({ width, height: viewport.height });
+      const heading = await page.getByRole("heading", { name: "Search", exact: true }).boundingBox();
+      const field = await page.getByTestId("search-input").boundingBox();
+      if (!heading || !field || Math.abs(heading.x - field.x) > 1 || field.x + field.width > width)
+        throw new Error(`Search title and field must align and fit at ${width}px`);
+    }
+  } finally {
+    await page.setViewportSize(viewport);
+  }
   await page.getByTestId("search-input").fill("Portland");
   await page.getByTestId("search-results").locator("> *").first().waitFor({ timeout: 15000 });
   return { results: await page.getByTestId("search-results").locator("> *").count() };

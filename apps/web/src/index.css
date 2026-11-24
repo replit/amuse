@@ -1,20 +1,76 @@
 @import "tailwindcss";
 
+@theme {
+  --color-canvas: #11131a;
+  --color-panel: #1c202c;
+  --color-surface: #252a38;
+  --color-hover: #303649;
+  --color-edge: #393f51;
+  --color-ink: #f0f2fb;
+  --color-muted: #aab1c5;
+  --color-accent: #595bc4;
+  --color-highlight: #b8c4ff;
+  --color-danger: #ac3d49;
+  --radius-control: 0.875rem;
+  --radius-card: 1.25rem;
+  --container-page: 68rem;
+  --container-reading: 48rem;
+  --container-chat: 45rem;
+}
+
 :root {
   color-scheme: dark;
-  --bg: #161616;
-  --side: #1b1b1b;
-  --panel: #1b1b1b;
-  --card: #262626;
-  --bubble: #262626;
-  --hover: #2c2c2c;
-  --line: #2f2f2f;
-  --ink: #ececec;
-  --muted: #9b9b9b;
-  --accent: #2d7ff9;
+  --bg: var(--color-canvas);
+  --side: var(--color-panel);
+  --panel: var(--color-panel);
+  --card: var(--color-surface);
+  --bubble: var(--color-surface);
+  --hover: var(--color-hover);
+  --line: var(--color-edge);
+  --ink: var(--color-ink);
+  --muted: var(--color-muted);
+  --accent: var(--color-accent);
   --accent-ink: #ffffff;
-  --accent-soft: rgba(45, 127, 249, 0.16);
+  --accent-soft: color-mix(in srgb, var(--accent) 24%, var(--bg));
   --ok: #3ccf6e;
+  --page-gutter: clamp(1rem, 4vw, 3rem);
+}
+
+@utility workspace-canvas {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 85% 0%, rgb(109 134 221 / 15%), transparent 52%), radial-gradient(ellipse at 8% 32%, rgb(113 88 162 / 10%), transparent 55%);
+}
+
+@utility glass {
+  background-color: var(--panel);
+  background-image: linear-gradient(140deg, rgb(220 235 255 / 8%), transparent 50%, rgb(157 177 255 / 4%));
+  box-shadow: inset 0 1px 0 rgb(239 246 255 / 12%);
+  @supports (backdrop-filter: blur(1px)) {
+    background-color: color-mix(in srgb, var(--panel) 82%, transparent);
+    backdrop-filter: blur(16px) saturate(125%);
+  }
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    background: var(--panel);
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+}
+
+@utility page-frame {
+  @apply mx-auto w-full max-w-page;
+  padding-inline: var(--page-gutter);
+}
+
+@utility chat-frame {
+  @apply mx-auto w-full max-w-chat px-4 md:px-6;
+}
+
+@layer base {
+  :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-highlight);
+    outline-offset: 3px;
+  }
 }
 
 html,
@@ -45,7 +101,7 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--line);
   border-radius: 10px;
   border: 3px solid transparent;
   background-clip: content-box;
@@ -69,8 +125,11 @@ body {
   scrollbar-gutter: stable;
 }
 @media (prefers-reduced-motion: reduce) {
-  .amuse-page {
-    animation: none;
+  .amuse-page,
+  .amuse-dot,
+  .animate-ping,
+  .animate-pulse {
+    animation: none !important;
   }
 }
 @keyframes amuse-dot {

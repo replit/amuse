@@ -45,7 +45,7 @@ function ChatsMenu({ title }: { title?: string }) {
       </button>
       {title && <div className="truncate text-sm text-[var(--muted)]">{title}</div>}
       {open && (
-        <div className="absolute left-0 top-10 w-72 rounded-2xl border border-[var(--line)] bg-[#202020] p-2 shadow-2xl">
+        <div className="glass absolute top-10 left-0 w-72 rounded-card border border-edge p-2 shadow-2xl">
           <Link
             href="/"
             onClick={() => setOpen(false)}
@@ -92,7 +92,7 @@ export function AgentHeader({ me, title, onCall }: { me: Me; title?: string; onC
   const busy = status !== "Idle";
   const pill = "flex h-8 items-center gap-1.5 rounded-full bg-[var(--card)] px-3 text-[13px] hover:bg-[var(--hover)]";
   return (
-    <div className="relative flex h-14 shrink-0 items-center gap-2 px-3 md:px-4">
+    <div className="glass relative z-20 flex h-16 shrink-0 items-center gap-2 border-b border-edge px-4 md:px-6">
       <ChatsMenu title={title} />
       {!open && (
         <button
@@ -103,7 +103,7 @@ export function AgentHeader({ me, title, onCall }: { me: Me; title?: string; onC
         >
           <AgentAvatar avatarUrl={me.agent.avatarUrl} size={40} busy={busy} />
           <span
-            className="-mt-1.5 max-w-[220px] truncate rounded-full border border-[var(--line)] bg-[#1f1f1f] px-2 py-px text-[11px]"
+            className="-mt-1.5 max-w-[min(12rem,35vw)] truncate rounded-full border border-edge bg-panel px-2 py-px text-[11px]"
             data-testid="agent-status"
             data-busy={busy ? "1" : "0"}
           >

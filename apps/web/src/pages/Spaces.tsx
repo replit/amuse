@@ -5,7 +5,7 @@ import { Loader2, RefreshCw, Trash2, Wand2 } from "lucide-react";
 import { api, del, patch, post, timeAgo } from "../lib/api";
 import type { Space } from "../lib/types";
 import { useIframeBridge } from "../components/ArtifactViewer";
-import { Button, Card, Empty, Input, PageHeader, Segmented, Textarea } from "../components/ui";
+import { Button, Card, Empty, Input, Page, Segmented, Textarea } from "../components/ui";
 
 const EXAMPLES = [
   "A holiday gift tracker with budgets per person",
@@ -33,65 +33,63 @@ export function SpacesPage() {
     nav("/");
   };
   return (
-    <div className="overflow-y-auto">
-      <PageHeader
-        title="Spaces"
-        subtitle="Your own mini-apps inside Amuse. Describe one and I'll build it."
-        right={
-          <Button onClick={() => setShowNew(true)} data-testid="new-space">
-            New space
-          </Button>
-        }
-      />
-      <div className="mx-auto max-w-5xl px-5 pb-16 md:px-8">
-        {showNew && (
-          <Card className="mb-6 p-5">
-            <div className="mb-2 font-semibold">What should your space do?</div>
-            <Textarea value={idea} onChange={(e) => setIdea(e.target.value)} rows={3} placeholder="Describe your idea…" data-testid="space-idea" />
-            <div className="mt-3 flex flex-wrap gap-2">
-              {EXAMPLES.map((e) => (
-                <button
-                  key={e}
-                  onClick={() => setIdea(e)}
-                  className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--muted)] hover:bg-[var(--hover)]"
-                >
-                  {e}
-                </button>
-              ))}
-            </div>
-            <div className="mt-4 flex gap-2">
-              <Button onClick={create} disabled={!idea.trim()} data-testid="build-space">
-                <Wand2 size={14} /> Build it
-              </Button>
-              <Button variant="ghost" onClick={() => setShowNew(false)}>
-                Cancel
-              </Button>
-            </div>
-          </Card>
-        )}
-        {spaces.length === 0 && !showNew && (
-          <Empty
-            icon="✨"
-            title="No spaces yet"
-            body="A space is a custom view built around your routines: a gift tracker, a school dashboard, a trip planner."
-          />
-        )}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {spaces.map((s) => (
-            <Link key={s.id} href={`/spaces/${s.id}`}>
-              <Card className="h-full cursor-pointer p-5 hover:bg-[var(--hover)]">
-                <div className="text-3xl">{s.emoji}</div>
-                <div className="mt-2 font-semibold">{s.title}</div>
-                <div className="text-sm text-[var(--muted)]">{s.description}</div>
-                <div className="mt-3 text-[11px] text-[var(--muted)]">
-                  {s.placement === "hidden" ? "Hidden" : s.placement === "tab" ? "In main tabs" : "In sidebar"} · updated {timeAgo(s.updatedAt)}
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
+    <Page
+      width="collection"
+      title="Spaces"
+      subtitle="Your own mini-apps inside Amuse. Describe one and I'll build it."
+      action={
+        <Button onClick={() => setShowNew(true)} data-testid="new-space">
+          New space
+        </Button>
+      }
+    >
+      {showNew && (
+        <Card className="mb-6 p-5">
+          <div className="mb-2 font-semibold">What should your space do?</div>
+          <Textarea value={idea} onChange={(e) => setIdea(e.target.value)} rows={3} placeholder="Describe your idea…" data-testid="space-idea" />
+          <div className="mt-3 flex flex-wrap gap-2">
+            {EXAMPLES.map((e) => (
+              <button
+                key={e}
+                onClick={() => setIdea(e)}
+                className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--muted)] hover:bg-[var(--hover)]"
+              >
+                {e}
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 flex gap-2">
+            <Button onClick={create} disabled={!idea.trim()} data-testid="build-space">
+              <Wand2 size={14} /> Build it
+            </Button>
+            <Button variant="ghost" onClick={() => setShowNew(false)}>
+              Cancel
+            </Button>
+          </div>
+        </Card>
+      )}
+      {spaces.length === 0 && !showNew && (
+        <Empty
+          icon="✨"
+          title="No spaces yet"
+          body="A space is a custom view built around your routines: a gift tracker, a school dashboard, a trip planner."
+        />
+      )}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {spaces.map((s) => (
+          <Link key={s.id} href={`/spaces/${s.id}`}>
+            <Card className="h-full cursor-pointer p-5 hover:bg-[var(--hover)]">
+              <div className="text-3xl">{s.emoji}</div>
+              <div className="mt-2 font-semibold">{s.title}</div>
+              <div className="text-sm text-[var(--muted)]">{s.description}</div>
+              <div className="mt-3 text-[11px] text-[var(--muted)]">
+                {s.placement === "hidden" ? "Hidden" : s.placement === "tab" ? "In main tabs" : "In sidebar"} · updated {timeAgo(s.updatedAt)}
+              </div>
+            </Card>
+          </Link>
+        ))}
       </div>
-    </div>
+    </Page>
   );
 }
 
@@ -127,10 +125,10 @@ export function SpaceView({ id }: { id: number }) {
   };
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--line)] px-4 py-2 pl-12 md:pl-4">
+      <div className="glass flex flex-wrap items-center gap-2 border-b border-edge px-(--page-gutter) py-3">
         <div className="mr-auto flex min-w-0 items-center gap-2">
           <span className="text-xl">{s.emoji}</span>
-          <span className="truncate font-semibold">{s.title}</span>
+          <h1 className="truncate font-semibold">{s.title}</h1>
         </div>
         <Segmented
           value={s.placement}

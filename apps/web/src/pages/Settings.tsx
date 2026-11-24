@@ -5,7 +5,7 @@ import { ChevronRight, KeyRound, Loader2, Trash2 } from "lucide-react";
 import { api, del, patch, post } from "../lib/api";
 import type { Me } from "../lib/types";
 import { AgentAvatar, PRESETS } from "../components/Creature";
-import { Button, Card, Input, PageHeader, Segmented, Toggle, cx } from "../components/ui";
+import { Button, Card, Input, Page, Segmented, Toggle, cx } from "../components/ui";
 import { deviceVoiceAvailable, setVoiceEngine, voiceEngine, type VoiceEngine } from "../lib/speech";
 
 function Section({ title, children, desc }: { title: string; desc?: string; children: React.ReactNode }) {
@@ -383,9 +383,8 @@ export function SettingsPage({ me }: { me: Me }) {
   const [, params] = useRoute("/settings/:tab");
   const tab = params?.tab ?? "agent";
   return (
-    <div className="overflow-y-auto">
-      <PageHeader title="Settings" />
-      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-5 pb-16 md:flex-row md:px-8">
+    <Page width="collection" title="Settings">
+      <div className="flex min-w-0 flex-col gap-6 md:flex-row">
         <nav className="flex shrink-0 gap-1 overflow-x-auto md:w-48 md:flex-col">
           {TABS.map((t) => (
             <Link
@@ -409,7 +408,7 @@ export function SettingsPage({ me }: { me: Me }) {
           {tab === "data" && <DataSettings me={me} />}
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
 

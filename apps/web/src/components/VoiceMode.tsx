@@ -332,7 +332,7 @@ export function VoiceMode({
   const sub = phase === "muted" ? "Your mic is off. Tap the mic to talk." : phase === "thinking" && status ? statusLine : hint;
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-[var(--bg)] py-10"
+      className="workspace-canvas fixed inset-0 z-50 flex flex-col items-center justify-between overflow-y-auto py-10"
       data-testid="voice-overlay"
       data-phase={phase}
       onClick={() => void callAudio().resume()}

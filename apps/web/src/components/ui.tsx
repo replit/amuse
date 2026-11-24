@@ -9,18 +9,18 @@ export function cx(...c: (string | false | null | undefined)[]) {
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "soft" | "danger" | "outline"; size?: "sm" | "md" | "lg" };
 export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button({ variant = "primary", size = "md", className, ...p }, ref) {
   const v = {
-    primary: "bg-[var(--ink)] text-[var(--bg)] hover:opacity-90",
-    ghost: "hover:bg-[var(--hover)] text-[var(--ink)]",
-    soft: "bg-[var(--card)] hover:bg-[var(--hover)] text-[var(--ink)] border border-[var(--line)]",
-    outline: "border border-[var(--line)] hover:bg-[var(--hover)] text-[var(--ink)]",
-    danger: "bg-[#B4373C] text-white hover:opacity-90",
+    primary: "bg-ink text-canvas hover:opacity-90",
+    ghost: "text-ink hover:bg-hover",
+    soft: "glass border border-edge text-ink hover:border-muted",
+    outline: "border border-edge text-ink hover:bg-hover",
+    danger: "bg-danger text-white hover:opacity-90",
   }[variant];
   const s = { sm: "h-8 px-3 text-sm", md: "h-10 px-4 text-sm", lg: "h-12 px-6 text-base" }[size];
   return (
     <button
       ref={ref}
       className={cx(
-        "inline-flex items-center justify-center gap-2 rounded-full font-medium transition disabled:opacity-40 disabled:pointer-events-none",
+        "inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none",
         v,
         s,
         className,
@@ -34,7 +34,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   return (
     <input
       ref={ref}
-      className={cx("h-10 w-full rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--ink)]", className)}
+      className={cx("h-10 w-full min-w-0 rounded-control border border-edge bg-surface px-3 text-sm placeholder:text-muted focus:border-highlight", className)}
       {...p}
     />
   );
@@ -44,7 +44,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
   return (
     <textarea
       ref={ref}
-      className={cx("w-full rounded-xl border border-[var(--line)] bg-[var(--card)] p-3 text-sm outline-none focus:border-[var(--ink)]", className)}
+      className={cx("w-full min-w-0 rounded-control border border-edge bg-surface p-3 text-sm placeholder:text-muted focus:border-highlight", className)}
       {...p}
     />
   );
@@ -52,7 +52,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
 
 export function Card({ className, children, ...p }: { className?: string; children: ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cx("rounded-2xl border border-[var(--line)] bg-[var(--card)]", className)} {...p}>
+    <div className={cx("min-w-0 rounded-card border border-edge bg-surface", className)} {...p}>
       {children}
     </div>
   );
@@ -75,10 +75,11 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
 
 export function Segmented<T extends string>({ value, options, onChange }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
   return (
-    <div className="inline-flex rounded-full border border-[var(--line)] bg-[var(--bg)] p-0.5">
+    <div className="glass inline-flex rounded-full border border-edge p-0.5">
       {options.map((o) => (
         <button
           key={o.value}
+          aria-pressed={value === o.value}
           onClick={() => onChange(o.value)}
           className={cx(
             "rounded-full px-3 py-1 text-sm transition",
@@ -114,7 +115,7 @@ export function Sheet({
       <div
         onClick={(e) => e.stopPropagation()}
         className={cx(
-          "relative ml-auto flex h-full flex-col bg-[var(--bg)] shadow-2xl",
+          "glass relative ml-auto flex h-full flex-col border-l border-edge shadow-2xl",
           side === "right" ? (wide ? "w-full max-w-4xl" : "w-full max-w-md") : "mt-auto h-[85vh] w-full rounded-t-3xl",
         )}
       >
@@ -142,14 +143,33 @@ export function Empty({ icon, title, body, action }: { icon: ReactNode; title: s
   );
 }
 
-export function PageHeader({ title, subtitle, right }: { title: string; subtitle?: string; right?: ReactNode }) {
+export function Page({
+  title,
+  subtitle,
+  action,
+  width,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+  width: "reading" | "collection";
+  children: ReactNode;
+}) {
   return (
-    <div className="flex items-end justify-between gap-4 px-5 pb-4 pt-6 md:px-8">
-      <div>
-        <h1 className="font-display text-2xl md:text-3xl">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-[var(--muted)]">{subtitle}</p>}
+    <div className="overflow-y-auto">
+      <div className="page-frame pt-8 pb-16 md:pt-12">
+        <div className={width === "reading" ? "max-w-reading" : undefined}>
+          <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-edge pb-5 md:mb-8 md:pb-6">
+            <div className="min-w-0">
+              <h1 className="font-display text-3xl tracking-tight text-ink md:text-4xl">{title}</h1>
+              {subtitle && <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted">{subtitle}</p>}
+            </div>
+            {action}
+          </header>
+          {children}
+        </div>
       </div>
-      {right}
     </div>
   );
 }

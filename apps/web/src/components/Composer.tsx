@@ -94,8 +94,8 @@ export function Composer({
     }
   };
   return (
-    <div className="mx-auto w-full max-w-[720px] px-3 pb-3 md:px-6 md:pb-5">
-      <div className="relative flex items-end gap-1 rounded-[24px] bg-[var(--card)] py-1.5 pl-1.5 pr-1.5 focus-within:ring-1 focus-within:ring-[#3a3a3a]">
+    <div className="chat-frame pb-3 md:pb-5">
+      <div className="glass relative flex items-end gap-1 rounded-3xl border border-edge p-1.5 focus-within:border-highlight">
         <button
           onClick={() => setMenu(!menu)}
           className="mb-0.5 rounded-full p-2 text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--ink)]"
@@ -105,10 +105,7 @@ export function Composer({
           <Plus size={18} />
         </button>
         {menu && (
-          <div
-            className="absolute bottom-12 left-0 z-30 w-56 rounded-2xl border border-[var(--line)] bg-[#202020] p-1.5 shadow-2xl"
-            onMouseLeave={() => setMenu(false)}
-          >
+          <div className="glass absolute bottom-12 left-0 z-30 w-56 rounded-card border border-edge p-1.5 shadow-2xl" onMouseLeave={() => setMenu(false)}>
             {[
               { label: "Make a space", icon: <LayoutGrid size={15} />, go: () => nav("/spaces?new=1") },
               { label: "Set a goal", icon: <Target size={15} />, go: () => nav("/goals") },
@@ -138,7 +135,7 @@ export function Composer({
             }
           }}
           placeholder={placeholder ?? (running ? "Add to what I'm doing…" : "Message")}
-          className="max-h-44 flex-1 resize-none bg-transparent px-1 py-2 text-[14.5px] outline-none placeholder:text-[#7a7a7a]"
+          className="max-h-44 min-w-0 flex-1 resize-none bg-transparent px-1 py-2 text-sm outline-none placeholder:text-muted"
           data-testid="composer-input"
         />
         <button

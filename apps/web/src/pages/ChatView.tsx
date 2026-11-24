@@ -204,7 +204,7 @@ export function ChatView({ me, chatId, title }: { me: Me; chatId: number; title?
         className="flex-1 overflow-y-auto"
         data-testid="chat-scroll"
       >
-        <div className="mx-auto flex w-full max-w-[720px] flex-col gap-2.5 px-4 pb-6 pt-10 md:px-6">
+        <div className="chat-frame flex flex-col gap-2.5 pt-8 pb-6">
           {loaded && visible.length === 0 && (
             <div className="flex flex-col items-center gap-3 py-16 text-center">
               <AgentAvatar avatarUrl={me.agent.avatarUrl} size={88} />

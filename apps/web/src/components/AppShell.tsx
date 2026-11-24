@@ -20,14 +20,15 @@ function RailItem({ href, icon, label, active, testid }: { href: string; icon: R
       href={href}
       data-testid={testid}
       aria-label={label}
+      aria-current={active ? "page" : undefined}
       title={label}
       className={cx(
         "group relative flex h-10 w-10 items-center justify-center rounded-xl transition",
-        active ? "bg-[var(--card)] text-[var(--ink)]" : "text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--ink)]",
+        active ? "glass text-highlight ring-1 ring-highlight/35" : "text-muted hover:bg-hover hover:text-ink",
       )}
     >
       {icon}
-      <span className="pointer-events-none absolute left-12 z-50 hidden whitespace-nowrap rounded-md bg-[#2a2a2a] px-2 py-1 text-xs text-[var(--ink)] shadow group-hover:block">
+      <span className="pointer-events-none absolute left-12 z-50 hidden whitespace-nowrap rounded-md border border-edge bg-panel px-2 py-1 text-xs text-ink shadow group-hover:block">
         {label}
       </span>
     </Link>
@@ -75,8 +76,8 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
   const pageKey = seg[0] === "chats" || seg[0] === "spaces" ? seg.slice(0, 2).join("/") : (seg[0] ?? "");
 
   return (
-    <div className="flex h-[100dvh] bg-[var(--bg)] text-[var(--ink)]">
-      <nav className="hidden w-16 shrink-0 flex-col items-center gap-1.5 border-r border-[var(--line)] bg-[var(--side)] py-3 md:flex">
+    <div className="workspace-canvas flex h-[100dvh] text-ink">
+      <nav aria-label="Workspace" className="glass relative z-20 hidden w-16 shrink-0 flex-col items-center gap-1.5 border-r border-edge py-3 md:flex">
         <div className="flex flex-1 flex-col items-center justify-center gap-1.5">
           <RailItem href="/" icon={<MessageCircle size={19} />} label="Chat" active={isChat} testid="nav-chat" />
           <RailItem href="/search" icon={<Search size={19} />} label="Search" active={loc.startsWith("/search")} testid="nav-search" />
@@ -153,7 +154,7 @@ function MobileNav({ loc, isChat, tabSpaces }: { loc: string; isChat: boolean; t
         <div className="fixed inset-0 z-30 md:hidden" onClick={() => setMore(false)}>
           <div className="absolute inset-0 bg-black/40" />
           <div
-            className="absolute bottom-[60px] right-2 w-48 rounded-2xl border border-[var(--line)] bg-[#202020] p-1.5 shadow-2xl"
+            className="glass absolute right-2 bottom-[calc(60px+env(safe-area-inset-bottom))] w-48 rounded-card border border-edge p-1.5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
             data-testid="mobile-more-sheet"
           >
@@ -172,11 +173,12 @@ function MobileNav({ loc, isChat, tabSpaces }: { loc: string; isChat: boolean; t
           </div>
         </div>
       )}
-      <nav className="relative z-30 flex border-t border-[var(--line)] bg-[var(--side)] md:hidden">
+      <nav aria-label="Workspace" className="glass relative z-30 flex border-t border-edge pb-[env(safe-area-inset-bottom)] md:hidden">
         {main.map((t) => (
           <Link
             key={t.href}
             href={t.href}
+            aria-current={active(t.href) ? "page" : undefined}
             className={cx("flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px]", active(t.href) ? "text-[var(--ink)]" : "text-[var(--muted)]")}
           >
             {t.icon}

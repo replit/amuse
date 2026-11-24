@@ -64,8 +64,8 @@ export function Onboarding({ me }: { me: Me }) {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-[var(--bg)] px-5 py-10 text-[var(--ink)]">
-      <div className="w-full max-w-md">
+    <div className="workspace-canvas flex min-h-[100dvh] flex-col items-center justify-center px-(--page-gutter) py-8 text-ink">
+      <div className="glass w-full max-w-lg rounded-card border border-edge p-5 sm:p-8">
         <div className="mb-8 flex justify-center gap-1.5">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className={cx("h-1.5 w-10 rounded-full", i <= step ? "bg-[var(--ink)]" : "bg-[var(--line)]")} />
@@ -74,7 +74,7 @@ export function Onboarding({ me }: { me: Me }) {
 
         {step === 0 && (
           <div className="text-center" data-testid="onb-welcome">
-            <div className="mx-auto mb-6 flex h-40 w-40 items-center justify-center rounded-full bg-[var(--card)] text-7xl shadow-inner animate-[pulse_3s_ease-in-out_infinite]">
+            <div className="mx-auto mb-6 flex h-40 w-40 items-center justify-center rounded-full bg-surface text-7xl shadow-inner motion-safe:animate-[pulse_3s_ease-in-out_infinite]">
               🪺
             </div>
             <h1 className="font-display text-3xl">{me.user.name ? `Hi ${me.user.name}.` : "Hi there."} Let's hatch your agent.</h1>

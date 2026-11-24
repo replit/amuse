@@ -417,10 +417,7 @@ export function AgentPanel({ me, overlay = false }: { me: Me; overlay?: boolean 
     { value: "identity", label: "Identity", icon: <UserRound size={16} /> },
   ];
   return (
-    <aside
-      className={cx("flex h-full w-[360px] max-w-full shrink-0 flex-col border-l border-[var(--line)] bg-[var(--panel)]", overlay && "shadow-2xl")}
-      data-testid="agent-panel"
-    >
+    <aside className={cx("glass flex h-full w-[min(22.5rem,100vw)] shrink-0 flex-col border-l border-edge", overlay && "shadow-2xl")} data-testid="agent-panel">
       <div className="flex justify-end px-3 pt-3">
         <button
           onClick={() => setOpen(false)}
@@ -462,7 +459,7 @@ export function AgentPanel({ me, overlay = false }: { me: Me; overlay?: boolean 
               onClick={() => (setTab(t.value), setTabKey((k) => k + 1))}
               className={cx(
                 "flex flex-1 items-center justify-center rounded-full py-1.5 transition",
-                tab === t.value ? "bg-[#3a3a3a] text-[var(--ink)]" : "text-[var(--muted)] hover:text-[var(--ink)]",
+                tab === t.value ? "bg-hover text-highlight" : "text-muted hover:text-ink",
               )}
             >
               {t.icon}
