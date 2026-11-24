@@ -4,8 +4,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, KeyRound, Loader2, Trash2 } from "lucide-react";
 import { api, del, patch, post } from "../lib/api";
 import type { Me } from "../lib/types";
-import { AgentAvatar, PRESETS } from "../components/Creature";
-import { Button, Card, Input, PageHeader, Segmented, Toggle, cx } from "../components/ui";
+import { AgentAvatar, AvatarPicker, portraitName } from "../components/Creature";
+import { m } from "framer-motion";
+import { reveal } from "../components/Motion";
+import { Button, Card, Input, Page, Segmented, Toggle, cx } from "../components/ui";
 import { deviceVoiceAvailable, setVoiceEngine, voiceEngine, type VoiceEngine } from "../lib/speech";
 
 function Section({ title, children, desc }: { title: string; desc?: string; children: React.ReactNode }) {
@@ -38,20 +40,17 @@ function AgentSettings({ me }: { me: Me }) {
   return (
     <>
       <Section title="Your agent">
-        <div className="mb-4 flex items-center gap-4">
-          <AgentAvatar avatarUrl={me.agent.avatarUrl} size={72} />
-          <div className="flex flex-wrap gap-2">
-            {PRESETS.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => save({ avatarUrl: `preset:${p.id}` })}
-                className={cx("rounded-full ring-offset-2", me.agent.avatarUrl === `preset:${p.id}` && "ring-2 ring-[var(--ink)]")}
-                aria-label={p.name}
-              >
-                <AgentAvatar avatarUrl={`preset:${p.id}`} size={40} />
-              </button>
-            ))}
+        <div className="mb-4 flex items-center gap-3">
+          <m.div key={me.agent.avatarUrl} initial={{ opacity: 0.6, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+            <AgentAvatar avatarUrl={me.agent.avatarUrl} size={56} />
+          </m.div>
+          <div>
+            <div className="text-xs text-muted">Current look</div>
+            <div className="font-medium text-ink">{portraitName(me.agent.avatarUrl)}</div>
           </div>
+        </div>
+        <div className="mb-5 max-w-lg">
+          <AvatarPicker value={me.agent.avatarUrl} onChange={(avatarUrl) => save({ avatarUrl })} />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-sm">
@@ -383,9 +382,8 @@ export function SettingsPage({ me }: { me: Me }) {
   const [, params] = useRoute("/settings/:tab");
   const tab = params?.tab ?? "agent";
   return (
-    <div className="overflow-y-auto">
-      <PageHeader title="Settings" />
-      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-5 pb-16 md:flex-row md:px-8">
+    <Page width="collection" title="Settings">
+      <div className="flex min-w-0 flex-col gap-6 md:flex-row">
         <nav className="flex shrink-0 gap-1 overflow-x-auto md:w-48 md:flex-col">
           {TABS.map((t) => (
             <Link
@@ -400,16 +398,16 @@ export function SettingsPage({ me }: { me: Me }) {
             </Link>
           ))}
         </nav>
-        <div className="min-w-0 flex-1">
+        <m.div key={tab} {...reveal} className="min-w-0 flex-1">
           {tab === "agent" && <AgentSettings me={me} />}
           {tab === "connectors" && <ConnectorsSettings />}
           {tab === "permissions" && <PermissionsSettings />}
           {tab === "credentials" && <CredentialsSettings />}
           {tab === "usage" && <UsageSettings />}
           {tab === "data" && <DataSettings me={me} />}
-        </div>
+        </m.div>
       </div>
-    </div>
+    </Page>
   );
 }
 

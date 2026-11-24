@@ -3,7 +3,7 @@
 Every package that ships in the server or the web app bundle, from `pnpm licenses list --prod`. All are
 permissive; none is GPL, AGPL, SSPL, BUSL or another license that restricts redistribution.
 
-244 packages: MIT 226, ISC 9, Apache-2.0 4, OFL-1.1 1, (MIT OR EUPL-1.1+) 1, MIT-0 1, BSD-3-Clause 1, Unlicense 1.
+248 packages: MIT 229, ISC 9, Apache-2.0 4, OFL-1.1 1, (MIT OR EUPL-1.1+) 1, MIT-0 1, BSD-3-Clause 1, Unlicense 1, 0BSD 1.
 
 | Package                                           | Version        | License            |
 | ------------------------------------------------- | -------------- | ------------------ |
@@ -77,6 +77,7 @@ permissive; none is GPL, AGPL, SSPL, BUSL or another license that restricts redi
 | finalhandler                                      | 2.1.1          | MIT                |
 | fontkit                                           | 2.0.4          | MIT                |
 | forwarded                                         | 0.2.0          | MIT                |
+| framer-motion                                     | 14.14.0        | MIT                |
 | fresh                                             | 2.0.0          | MIT                |
 | function-bind                                     | 1.1.2          | MIT                |
 | get-caller-file                                   | 2.0.5          | ISC                |
@@ -157,6 +158,8 @@ permissive; none is GPL, AGPL, SSPL, BUSL or another license that restricts redi
 | micromark-util-types                              | 2.0.3          | MIT                |
 | mime-db                                           | 1.54.0         | MIT                |
 | mime-types                                        | 3.0.2          | MIT                |
+| motion-dom                                        | 14.14.0        | MIT                |
+| motion-utils                                      | 14.7.0         | MIT                |
 | ms                                                | 2.1.3          | MIT                |
 | negotiator                                        | 1.1.0          | MIT                |
 | nodemailer                                        | 10.4.0         | MIT-0              |
@@ -231,6 +234,7 @@ permissive; none is GPL, AGPL, SSPL, BUSL or another license that restricts redi
 | toidentifier                                      | 1.0.1          | MIT                |
 | trim-lines                                        | 3.0.1          | MIT                |
 | trough                                            | 2.2.0          | MIT                |
+| tslib                                             | 2.9.1          | 0BSD               |
 | type-is                                           | 2.1.0          | MIT                |
 | undici                                            | 7.30.2         | MIT                |
 | undici-types                                      | 7.24.6         | MIT                |

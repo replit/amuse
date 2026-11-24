@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { m } from "framer-motion";
+import { useMotionAllowed } from "./Motion";
 import { ExternalLink, Mic, MicOff, PhoneOff, Hand } from "lucide-react";
 import { post } from "../lib/api";
 import { useEvent } from "../lib/events";
@@ -45,6 +47,7 @@ export function VoiceMode({
   voice: string;
 }) {
   const [phase, setPhase] = useState<Phase>("connecting");
+  const animate = useMotionAllowed();
   const [you, setYou] = useState("");
   const [reply, setReply] = useState("");
   const [hint, setHint] = useState("");
@@ -326,13 +329,15 @@ export function VoiceMode({
   }, [open]);
 
   if (!open) return null;
-  const ringScale = 1 + (phase === "listening" || phase === "speaking" ? level * 0.35 : 0);
+  const ringScale = 1 + (animate && (phase === "listening" || phase === "speaking") ? level * 0.35 : 0);
   const ringColor = phase === "speaking" || phase === "preparing" ? "#3b82f6" : phase === "error" ? "#ef4444" : phase === "muted" ? "#9ca3af" : "#22c55e";
   const statusLine = /^is /i.test(status) ? `${name} ${status}…` : status;
   const sub = phase === "muted" ? "Your mic is off. Tap the mic to talk." : phase === "thinking" && status ? statusLine : hint;
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-[var(--bg)] py-10"
+    <m.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="workspace-canvas fixed inset-0 z-50 flex flex-col items-center justify-between overflow-y-auto py-10"
       data-testid="voice-overlay"
       data-phase={phase}
       onClick={() => void callAudio().resume()}
@@ -341,19 +346,20 @@ export function VoiceMode({
 
       <div className="flex flex-col items-center gap-6">
         <div className="relative flex h-[260px] w-[260px] items-center justify-center">
-          <div
-            className={`absolute inset-6 rounded-full transition-transform duration-75 ${phase === "thinking" || phase === "transcribing" || phase === "preparing" || phase === "connecting" ? "animate-pulse" : ""}`}
+          <m.div
+            className="absolute inset-6 rounded-full"
+            initial={false}
+            animate={{ scale: ringScale, opacity: phase === "muted" ? 0.25 : 1 }}
+            transition={{ duration: 0.09 }}
             style={{
-              transform: `scale(${ringScale})`,
               boxShadow: `0 0 0 6px ${ringColor}55, 0 0 40px 6px ${ringColor}33`,
-              opacity: phase === "muted" ? 0.25 : 1,
             }}
             data-testid="voice-ring"
           />
           <AgentAvatar avatarUrl={avatarUrl} size={180} busy={phase === "thinking" || phase === "transcribing"} />
         </div>
         <div className="flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-[var(--muted)]" data-testid="voice-phase">
-          {(phase === "listening" || phase === "speaking") && (
+          {animate && (phase === "listening" || phase === "speaking") && (
             <span className="flex h-4 items-end gap-[3px]">
               {[0.6, 1, 0.75].map((k, i) => (
                 <span key={i} className="w-[3px] rounded-full" style={{ height: `${4 + Math.round(level * 12 * k)}px`, background: ringColor }} />
@@ -431,6 +437,6 @@ export function VoiceMode({
           <PhoneOff size={22} />
         </button>
       </div>
-    </div>
+    </m.div>
   );
 }

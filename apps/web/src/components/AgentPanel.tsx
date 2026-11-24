@@ -21,7 +21,9 @@ import { api, del, patch, timeUntil } from "../lib/api";
 import { useEvents } from "../lib/events";
 import type { Me } from "../lib/types";
 import { ApprovalCard } from "./ApprovalCard";
-import { AgentAvatar, PRESETS } from "./Creature";
+import { AgentAvatar, AvatarPicker } from "./Creature";
+import { AnimatePresence, m } from "framer-motion";
+import { reveal } from "./Motion";
 import { FilesBrowser } from "./FilesBrowser";
 import { Button, cx, Empty, Input } from "./ui";
 
@@ -61,11 +63,25 @@ function Section({ title, children, defaultOpen = true }: { title: ReactNode; ch
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="px-4 pb-2 pt-3">
-      <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between py-1 text-[13px] text-[var(--ink)]">
+      <button aria-expanded={open} onClick={() => setOpen(!open)} className="flex w-full items-center justify-between py-1 text-[13px] text-[var(--ink)]">
         <span>{title}</span>
-        <ChevronDown size={16} className={cx("text-[var(--muted)] transition", !open && "-rotate-90")} />
+        <m.span initial={false} animate={{ rotate: open ? 0 : -90 }}>
+          <ChevronDown size={16} className="text-muted" />
+        </m.span>
       </button>
-      {open && <div className="mt-1">{children}</div>}
+      <AnimatePresence initial={false}>
+        {open && (
+          <m.div
+            key="details"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-1">{children}</div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -292,21 +308,7 @@ function IdentityTab({ me, editing, setEditing }: { me: Me; editing: boolean; se
           </button>
         ) : (
           <div className="mt-3 space-y-3">
-            <div className="flex flex-wrap justify-center gap-2">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => save({ avatarUrl: `preset:${p.id}` })}
-                  aria-label={p.name}
-                  className={cx(
-                    "rounded-full ring-offset-2 ring-offset-[var(--card)]",
-                    me.agent.avatarUrl === `preset:${p.id}` && "ring-2 ring-[var(--accent)]",
-                  )}
-                >
-                  <AgentAvatar avatarUrl={`preset:${p.id}`} size={40} />
-                </button>
-              ))}
-            </div>
+            <AvatarPicker value={me.agent.avatarUrl} onChange={(avatarUrl) => save({ avatarUrl })} />
             <label className="block text-xs text-[var(--muted)]">
               Name
               <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" data-testid="identity-name-input" />
@@ -417,10 +419,7 @@ export function AgentPanel({ me, overlay = false }: { me: Me; overlay?: boolean 
     { value: "identity", label: "Identity", icon: <UserRound size={16} /> },
   ];
   return (
-    <aside
-      className={cx("flex h-full w-[360px] max-w-full shrink-0 flex-col border-l border-[var(--line)] bg-[var(--panel)]", overlay && "shadow-2xl")}
-      data-testid="agent-panel"
-    >
+    <aside className={cx("glass flex h-full w-[min(22.5rem,100vw)] shrink-0 flex-col border-l border-edge", overlay && "shadow-2xl")} data-testid="agent-panel">
       <div className="flex justify-end px-3 pt-3">
         <button
           onClick={() => setOpen(false)}
@@ -462,7 +461,7 @@ export function AgentPanel({ me, overlay = false }: { me: Me; overlay?: boolean 
               onClick={() => (setTab(t.value), setTabKey((k) => k + 1))}
               className={cx(
                 "flex flex-1 items-center justify-center rounded-full py-1.5 transition",
-                tab === t.value ? "bg-[#3a3a3a] text-[var(--ink)]" : "text-[var(--muted)] hover:text-[var(--ink)]",
+                tab === t.value ? "bg-hover text-highlight" : "text-muted hover:text-ink",
               )}
             >
               {t.icon}
@@ -470,11 +469,11 @@ export function AgentPanel({ me, overlay = false }: { me: Me; overlay?: boolean 
           ))}
         </div>
       </div>
-      <div className="mt-1 min-h-0 flex-1 overflow-y-auto pb-6">
+      <m.div key={tab} {...reveal} className="mt-1 min-h-0 flex-1 overflow-y-auto pb-6">
         {tab === "activity" && <ActivityTab key={tabKey} />}
         {tab === "approvals" && <ApprovalsTab />}
         {tab === "identity" && <IdentityTab key={tabKey} me={me} editing={editing} setEditing={setEditing} />}
-      </div>
+      </m.div>
     </aside>
   );
 }

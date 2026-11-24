@@ -1,56 +1,17 @@
+import { Check } from "lucide-react";
+import { AnimatePresence, m } from "framer-motion";
+import { cx } from "./ui";
+import { settle, useMotionAllowed } from "./Motion";
+
 /**
  * Amuse's built-in companion creatures.
  * avatarUrl formats: "preset:<id>" | "sheet:<dataUrl>#<quadrant 0-3>" | data/http URL.
  */
-export const PRESETS = [
-  { id: "pip", name: "Pip", body: "#F4B183", belly: "#FCE3CF", ear: "round", accent: "#C2410C" },
-  { id: "moss", name: "Moss", body: "#A3C4A8", belly: "#E3F0E5", ear: "leaf", accent: "#3F6B4B" },
-  { id: "plum", name: "Plum", body: "#C7A6E0", belly: "#F1E6FA", ear: "tuft", accent: "#6B3FA0" },
-  { id: "sky", name: "Sky", body: "#9DC7EC", belly: "#E4F1FB", ear: "round", accent: "#2563A8" },
-  { id: "honey", name: "Honey", body: "#F2D16B", belly: "#FBF1C9", ear: "tuft", accent: "#A16207" },
-  { id: "coral", name: "Coral", body: "#F29B9B", belly: "#FDE2E2", ear: "leaf", accent: "#B4373C" },
-];
+const PRESETS = ["Pip", "Moss", "Plum", "Sky", "Honey", "Coral"].map((name) => ({ name, id: name.toLowerCase() }));
 
-export function CreatureSvg({ id, mood = "happy", size = 64 }: { id: string; mood?: "happy" | "busy" | "sleepy"; size?: number }) {
-  const p = PRESETS.find((x) => x.id === id) ?? PRESETS[0]!;
-  return (
-    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden>
-      {p.ear === "round" && (
-        <>
-          <circle cx="28" cy="24" r="11" fill={p.body} />
-          <circle cx="72" cy="24" r="11" fill={p.body} />
-          <circle cx="28" cy="24" r="5" fill={p.belly} />
-          <circle cx="72" cy="24" r="5" fill={p.belly} />
-        </>
-      )}
-      {p.ear === "leaf" && (
-        <>
-          <path d="M30 30 Q18 8 38 14 Z" fill={p.accent} />
-          <path d="M70 30 Q82 8 62 14 Z" fill={p.accent} />
-        </>
-      )}
-      {p.ear === "tuft" && <path d="M44 16 Q50 2 56 16 Q50 11 44 16 Z" fill={p.accent} />}
-      <ellipse cx="50" cy="56" rx="38" ry="36" fill={p.body} />
-      <ellipse cx="50" cy="68" rx="24" ry="20" fill={p.belly} />
-      {mood === "sleepy" ? (
-        <>
-          <path d="M33 50 q5 4 10 0" stroke="#2B2420" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <path d="M57 50 q5 4 10 0" stroke="#2B2420" strokeWidth="3" fill="none" strokeLinecap="round" />
-        </>
-      ) : (
-        <>
-          <ellipse cx="38" cy="49" rx="5" ry={mood === "busy" ? 4 : 6} fill="#2B2420" />
-          <ellipse cx="62" cy="49" rx="5" ry={mood === "busy" ? 4 : 6} fill="#2B2420" />
-          <circle cx="39.5" cy="47" r="1.6" fill="#fff" />
-          <circle cx="63.5" cy="47" r="1.6" fill="#fff" />
-        </>
-      )}
-      <circle cx="30" cy="60" r="4" fill={p.accent} opacity="0.25" />
-      <circle cx="70" cy="60" r="4" fill={p.accent} opacity="0.25" />
-      <path d={mood === "busy" ? "M45 62 h10" : "M44 60 q6 6 12 0"} stroke="#2B2420" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <path d="M47 57 l3 3 l3 -3 z" fill={p.accent} />
-    </svg>
-  );
+export function portraitName(avatarUrl: string | null) {
+  const url = avatarUrl ?? "preset:pip";
+  return url.startsWith("preset:") ? (PRESETS.find(({ id }) => url === `preset:${id}`)?.name ?? "Pip") : "Custom portrait";
 }
 
 const BASE = (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "");
@@ -59,21 +20,75 @@ export function presetImage(id: string, busy = false) {
   return `${BASE}/avatars/${p.id}${busy ? "_busy" : ""}.jpg`;
 }
 
+export function AvatarPicker({ value, onChange }: { value: string | null; onChange: (avatarUrl: string) => void }) {
+  const animate = useMotionAllowed();
+  return (
+    <fieldset className="@container min-w-0">
+      <legend className="mb-2.5 text-sm font-medium text-ink">Choose a companion</legend>
+      <div className="grid grid-cols-3 gap-2.5 @min-[26rem]:grid-cols-6">
+        {PRESETS.map(({ id, name }) => {
+          const url = `preset:${id}`;
+          const selected = (value ?? "preset:pip") === url;
+          return (
+            <m.button
+              key={id}
+              whileHover={animate ? { y: -2 } : undefined}
+              whileTap={animate ? { scale: 0.96 } : undefined}
+              transition={settle}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onChange(url)}
+              className={cx(
+                "group relative min-w-0 overflow-hidden rounded-control border bg-panel text-left motion-safe:transition-colors",
+                selected ? "border-highlight ring-1 ring-highlight" : "border-edge hover:border-muted",
+              )}
+            >
+              <img src={presetImage(id)} alt="" draggable={false} width={384} height={384} className="aspect-square w-full object-cover" />
+              <span className={cx("block px-2 py-1.5 text-center text-xs font-medium", selected ? "glass text-ink" : "text-muted group-hover:text-ink")}>
+                {name}
+              </span>
+              <AnimatePresence initial={false}>
+                {selected && (
+                  <m.span
+                    key="selected"
+                    initial={{ opacity: 0, scale: 0.75 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.85 }}
+                    transition={settle}
+                    aria-hidden="true"
+                    className="absolute top-1.5 right-1.5 grid size-4.5 place-items-center rounded-full bg-ink text-canvas shadow"
+                  >
+                    <Check size={12} strokeWidth={3} />
+                  </m.span>
+                )}
+              </AnimatePresence>
+            </m.button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
 /** Plush companion portrait; swaps to a "working" pose (headphones + laptop) while busy. */
 export function PlushAvatar({ id, size = 64, busy = false, className = "" }: { id: string; size?: number; busy?: boolean; className?: string }) {
   return (
     <div className={`relative shrink-0 overflow-hidden rounded-full bg-[var(--card)] ${className}`} style={{ width: size, height: size }}>
-      <img
+      <m.img
         src={presetImage(id, false)}
         alt=""
         draggable={false}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${busy ? "opacity-0" : "opacity-100"}`}
+        initial={false}
+        animate={{ opacity: busy ? 0 : 1 }}
+        className="absolute inset-0 h-full w-full object-cover"
       />
-      <img
+      <m.img
         src={presetImage(id, true)}
         alt=""
         draggable={false}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${busy ? "opacity-100" : "opacity-0"}`}
+        initial={false}
+        animate={{ opacity: busy ? 1 : 0 }}
+        className="absolute inset-0 h-full w-full object-cover"
       />
     </div>
   );

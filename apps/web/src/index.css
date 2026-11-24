@@ -1,20 +1,74 @@
 @import "tailwindcss";
 
+@theme {
+  --color-canvas: #161616;
+  --color-panel: #1b1b1b;
+  --color-surface: #262626;
+  --color-hover: #303030;
+  --color-edge: #393939;
+  --color-ink: #ececec;
+  --color-muted: #a5a5a5;
+  --color-accent: #626262;
+  --color-highlight: #d4d4d4;
+  --color-danger: #ac3d49;
+  --radius-control: 0.875rem;
+  --radius-card: 1.25rem;
+  --container-page: 68rem;
+  --container-reading: 48rem;
+  --container-chat: 45rem;
+}
+
 :root {
   color-scheme: dark;
-  --bg: #161616;
-  --side: #1b1b1b;
-  --panel: #1b1b1b;
-  --card: #262626;
-  --bubble: #262626;
-  --hover: #2c2c2c;
-  --line: #2f2f2f;
-  --ink: #ececec;
-  --muted: #9b9b9b;
-  --accent: #2d7ff9;
+  --bg: var(--color-canvas);
+  --side: var(--color-panel);
+  --panel: var(--color-panel);
+  --card: var(--color-surface);
+  --bubble: var(--color-surface);
+  --hover: var(--color-hover);
+  --line: var(--color-edge);
+  --ink: var(--color-ink);
+  --muted: var(--color-muted);
+  --accent: var(--color-accent);
   --accent-ink: #ffffff;
-  --accent-soft: rgba(45, 127, 249, 0.16);
+  --accent-soft: color-mix(in srgb, var(--accent) 24%, var(--bg));
   --ok: #3ccf6e;
+  --page-gutter: clamp(1rem, 4vw, 3rem);
+}
+
+@utility workspace-canvas {
+  background-color: var(--bg);
+}
+
+@utility glass {
+  background-color: var(--panel);
+  background-image: linear-gradient(140deg, rgb(255 255 255 / 6%), transparent 50%, rgb(255 255 255 / 2%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
+  @supports (backdrop-filter: blur(1px)) {
+    background-color: color-mix(in srgb, var(--panel) 82%, transparent);
+    backdrop-filter: blur(16px);
+  }
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    background: var(--panel);
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+}
+
+@utility page-frame {
+  @apply mx-auto w-full max-w-page;
+  padding-inline: var(--page-gutter);
+}
+
+@utility chat-frame {
+  @apply mx-auto w-full max-w-chat px-4 md:px-6;
+}
+
+@layer base {
+  :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-highlight);
+    outline-offset: 3px;
+  }
 }
 
 html,
@@ -45,7 +99,7 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--line);
   border-radius: 10px;
   border: 3px solid transparent;
   background-clip: content-box;
@@ -53,40 +107,17 @@ body {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-@keyframes amuse-page {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-.amuse-page {
-  animation: amuse-page 140ms ease-out;
-}
 /* Reserve scrollbar space so content width doesn't jump between short and long pages. */
 .amuse-page > * {
   scrollbar-gutter: stable;
 }
 @media (prefers-reduced-motion: reduce) {
-  .amuse-page {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0s !important;
   }
-}
-@keyframes amuse-dot {
-  0%,
-  80%,
-  100% {
-    opacity: 0.25;
-    transform: translateY(0);
-  }
-  40% {
-    opacity: 1;
-    transform: translateY(-2px);
-  }
-}
-.amuse-dot {
-  animation: amuse-dot 1.2s infinite ease-in-out;
 }
 
 .prose-amuse {

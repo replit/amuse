@@ -2,6 +2,8 @@
 
 Issues and pull requests are welcome. Please run `pnpm typecheck` and `pnpm build` before opening a PR.
 
+For web UI changes, follow the [design system and page layout rules](docs/DESIGN.md).
+
 ## Database changes
 
 Edit `lib/db/src/schema/*.ts`, then generate a migration:

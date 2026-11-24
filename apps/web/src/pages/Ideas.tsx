@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, RefreshCw, X } from "lucide-react";
 import { api, post } from "../lib/api";
 import type { Idea } from "../lib/types";
-import { Button, Card, Empty, PageHeader } from "../components/ui";
+import { Button, Card, Empty, Page } from "../components/ui";
 
 export function IdeasPage() {
   const qc = useQueryClient();
@@ -23,17 +23,17 @@ export function IdeasPage() {
     }
   };
   return (
-    <div className="overflow-y-auto">
-      <PageHeader
-        title="Ideas"
-        subtitle="Things I could take off your plate, based on what I know about you."
-        right={
-          <Button variant="soft" onClick={more} disabled={busy} data-testid="more-ideas">
-            {busy ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} More ideas
-          </Button>
-        }
-      />
-      <div className="mx-auto grid max-w-5xl gap-4 px-5 pb-16 sm:grid-cols-2 lg:grid-cols-3 md:px-8">
+    <Page
+      width="collection"
+      title="Ideas"
+      subtitle="Things I could take off your plate, based on what I know about you."
+      action={
+        <Button variant="soft" onClick={more} disabled={busy} data-testid="more-ideas">
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />} More ideas
+        </Button>
+      }
+    >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {ideas.length === 0 && (
           <div className="col-span-full">
             <Empty icon="💡" title="No ideas right now" body="Tap 'More ideas' and I'll suggest things tailored to you." />
@@ -79,6 +79,6 @@ export function IdeasPage() {
           </Card>
         ))}
       </div>
-    </div>
+    </Page>
   );
 }

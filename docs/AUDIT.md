@@ -8,7 +8,7 @@ below on every pull request and every push to `main` and `develop`.
 - **Amuse** is licensed under Apache-2.0 (`LICENSE`, `NOTICE`).
 - **Dependencies.** Every package that ships in the server or the web app bundle is listed with its
   license in `THIRD_PARTY_LICENSES.md`. All are permissive (MIT, ISC, Apache-2.0, BSD-3-Clause,
-  MIT-0, Unlicense, and OFL-1.1 for the Inter typeface). `@zone-eu/mailsplit` is dual-licensed
+  MIT-0, 0BSD, Unlicense, and OFL-1.1 for the Inter typeface). `@zone-eu/mailsplit` is dual-licensed
   "MIT OR EUPL-1.1+" and used under MIT. Nothing is GPL, AGPL, SSPL or BUSL.
 - **Code and assets.** No third-party source is vendored. The avatar images were generated for this
   project with an AI image model, and the tip images are screenshots of Amuse. Credits and
