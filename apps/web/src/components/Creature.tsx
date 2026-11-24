@@ -7,6 +7,11 @@ import { cx } from "./ui";
  */
 const PRESETS = ["Pip", "Moss", "Plum", "Sky", "Honey", "Coral"].map((name) => ({ name, id: name.toLowerCase() }));
 
+export function portraitName(avatarUrl: string | null) {
+  const url = avatarUrl ?? "preset:pip";
+  return url.startsWith("preset:") ? (PRESETS.find(({ id }) => url === `preset:${id}`)?.name ?? "Pip") : "Custom portrait";
+}
+
 const BASE = (import.meta.env.BASE_URL ?? "/").replace(/\/$/, "");
 export function presetImage(id: string, busy = false) {
   const p = PRESETS.find((x) => x.id === id) ?? PRESETS[0]!;

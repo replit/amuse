@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, KeyRound, Loader2, Trash2 } from "lucide-react";
 import { api, del, patch, post } from "../lib/api";
 import type { Me } from "../lib/types";
-import { AgentAvatar, AvatarPicker } from "../components/Creature";
+import { AgentAvatar, AvatarPicker, portraitName } from "../components/Creature";
 import { Button, Card, Input, Page, Segmented, Toggle, cx } from "../components/ui";
 import { deviceVoiceAvailable, setVoiceEngine, voiceEngine, type VoiceEngine } from "../lib/speech";
 
@@ -42,7 +42,7 @@ function AgentSettings({ me }: { me: Me }) {
           <AgentAvatar avatarUrl={me.agent.avatarUrl} size={56} />
           <div>
             <div className="text-xs text-muted">Current look</div>
-            <div className="font-medium text-ink">{me.agent.name}</div>
+            <div className="font-medium text-ink">{portraitName(me.agent.avatarUrl)}</div>
           </div>
         </div>
         <div className="mb-5 max-w-lg">
